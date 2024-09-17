@@ -52,8 +52,6 @@ public class Main {
                 .build();
 
         jdaBots.put(JdaBot.class, new JdaBot(jda));
-
-        LOGGER.atInfo().log("done!");
     }
 
     public static @NotNull Object getBot(@NotNull Class<JdaBot> clazz) {

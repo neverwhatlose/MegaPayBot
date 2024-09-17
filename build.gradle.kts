@@ -37,7 +37,7 @@ project.tasks.build {
 tasks.jar {
     manifest {
         attributes(
-            "Main-Class" to "ru.nwtls.megapaybot.BotMain"
+            "Main-Class" to "ru.nwtls.megapaybot.Main"
         )
     }
 }

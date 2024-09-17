@@ -1,8 +1,9 @@
-package ru.nwtls.megapaybot.ticketsystem;
+package ru.nwtls.megapaybot.ticket;
 
+import org.jetbrains.annotations.NotNull;
 import ru.nwtls.megapaybot.JdaBot;
 import ru.nwtls.megapaybot.Main;
 
 public class TicketManager {
-    JdaBot bot = (JdaBot) Main.getBot(JdaBot.class);
+    private final @NotNull JdaBot bot = (JdaBot) Main.getBot(JdaBot.class);
 }
