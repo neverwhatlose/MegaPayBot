@@ -5,5 +5,5 @@ import ru.nwtls.megapaybot.JdaBot;
 import ru.nwtls.megapaybot.Main;
 
 public class TicketManager {
-    private final @NotNull JdaBot bot = (JdaBot) Main.getBot(JdaBot.class);
+    private final @NotNull JdaBot bot = Main.getBot();
 }

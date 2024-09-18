@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class Main {
     public static final @NotNull Logger LOGGER = LoggerFactory.getLogger(Main.class);
-    private static final HashMap<Class<JdaBot>, Object> jdaBots = new HashMap<>();
+    private static final HashMap<Class<JdaBot>, JdaBot> jdaBots = new HashMap<>();
     private static final EnumSet<GatewayIntent> intents = EnumSet.of(
             GatewayIntent.GUILD_MESSAGES,
             GatewayIntent.GUILD_MEMBERS,
@@ -38,7 +38,7 @@ public class Main {
     );
 
     @SuppressWarnings("unchecked")
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Map<String, Object> config = loadConfig();
         if (config == null) {
             LOGGER.atError().log("config.yml not found. Contact the developer. Startup aborted");
@@ -49,13 +49,13 @@ public class Main {
 
         JDA jda = JDABuilder.create(botConfig.get("token").toString(), intents)
                 .setActivity(Activity.listening("Yandex.Music"))
-                .build();
+                .build().awaitReady();
 
-        jdaBots.put(JdaBot.class, new JdaBot(jda));
+        jdaBots.put(JdaBot.class, new JdaBot(jda, botConfig.get("initial_symbol").toString()));
     }
 
-    public static @NotNull Object getBot(@NotNull Class<JdaBot> clazz) {
-        return jdaBots.get(clazz);
+    public static @NotNull JdaBot getBot() {
+        return jdaBots.get(JdaBot.class);
     }
 
     public static @Nullable Map<String, Object> loadConfig() {
