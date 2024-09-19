@@ -18,13 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Main {
-    public static final @NotNull Logger LOGGER = LoggerFactory.getLogger(Main.class);
-    private static final HashMap<Class<JdaBot>, JdaBot> jdaBots = new HashMap<>();
+    private static final @NotNull Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static JdaBot jdaBot;
     private static final EnumSet<GatewayIntent> intents = EnumSet.of(
             GatewayIntent.GUILD_MESSAGES,
             GatewayIntent.GUILD_MEMBERS,
@@ -38,7 +37,7 @@ public class Main {
     );
 
     @SuppressWarnings("unchecked")
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         Map<String, Object> config = loadConfig();
         if (config == null) {
             LOGGER.atError().log("config.yml not found. Contact the developer. Startup aborted");
@@ -46,21 +45,32 @@ public class Main {
         }
 
         LinkedHashMap<String, Object> botConfig = (LinkedHashMap<String, Object>) config.get("bot");
+        try {
+            JDA jda = JDABuilder.create(botConfig.get("token").toString(), intents)
+                    .setActivity(Activity.listening("Yandex.Music"))
+                    .build().awaitReady();
 
-        JDA jda = JDABuilder.create(botConfig.get("token").toString(), intents)
-                .setActivity(Activity.listening("Yandex.Music"))
-                .build().awaitReady();
-
-        jdaBots.put(JdaBot.class, new JdaBot(jda, botConfig.get("initial_symbol").toString()));
-    }
-
-    public static @NotNull JdaBot getBot() {
-        return jdaBots.get(JdaBot.class);
+            jdaBot = new JdaBot(jda, botConfig.get("initial_symbol").toString());
+        } catch (InterruptedException ex) {
+            LOGGER.atError().log(ex.getMessage());
+            System.exit(1);
+        }
     }
 
     public static @Nullable Map<String, Object> loadConfig() {
         File file = new File("./config.yml");
-        if (!file.exists()) preloadConfig();
+
+        if (!file.exists()) {
+            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.yml")) {
+                if (inputStream == null) {
+                    System.out.println("config.yml not found. Contact the developer");
+                    return null;
+                }
+                Files.copy(inputStream, Path.of("./config.yml"), StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
 
         Yaml yaml = new Yaml();
         try (InputStream input = new FileInputStream("./config.yml")) {
@@ -71,15 +81,11 @@ public class Main {
         return null;
     }
 
-    private static void preloadConfig() {
-        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.yml")) {
-            if (inputStream == null) {
-                System.out.println("config.yml not found. Contact the developer");
-                return;
-            }
-            Files.copy(inputStream, Path.of("./config.yml"), StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+    public static @NotNull JdaBot getBot() {
+        return jdaBot;
+    }
+
+    public static @NotNull Logger getLogger() {
+        return LOGGER;
     }
 }
