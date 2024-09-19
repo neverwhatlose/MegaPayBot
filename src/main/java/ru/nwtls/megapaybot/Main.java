@@ -18,12 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
     private static final @NotNull Logger LOGGER = LoggerFactory.getLogger(Main.class);
+
     private static JdaBot jdaBot;
+    private static Map<String, Object> config;
     private static final EnumSet<GatewayIntent> intents = EnumSet.of(
             GatewayIntent.GUILD_MESSAGES,
             GatewayIntent.GUILD_MEMBERS,
@@ -38,13 +40,13 @@ public class Main {
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
-        Map<String, Object> config = loadConfig();
+        config = loadConfig();
         if (config == null) {
             LOGGER.atError().log("config.yml not found. Contact the developer. Startup aborted");
             return;
         }
 
-        LinkedHashMap<String, Object> botConfig = (LinkedHashMap<String, Object>) config.get("bot");
+        HashMap<String, Object> botConfig = (HashMap<String, Object>) config.get("bot");
         try {
             JDA jda = JDABuilder.create(botConfig.get("token").toString(), intents)
                     .setActivity(Activity.listening("Yandex.Music"))
@@ -85,7 +87,7 @@ public class Main {
         return jdaBot;
     }
 
-    public static @NotNull Logger getLogger() {
-        return LOGGER;
+    public static @NotNull Map<String, Object> getConfig() {
+        return config;
     }
 }
